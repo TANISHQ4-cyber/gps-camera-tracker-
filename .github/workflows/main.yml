@@ -19,14 +19,24 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+    - name: Find and Fix Permissions for gradlew
+      run: |
+        GRADLEW_PATH=$(find . -name "gradlew" | head -n 1)
+        if [ -z "$GRADLEW_PATH" ]; then
+          echo "Bhai gradlew file pure project me kahi nahi mili!"
+          exit 1
+        fi
+        echo "Gradlew found at: $GRADLEW_PATH"
+        chmod +x "$GRADLEW_PATH"
+        echo "GRADLEW_DIR=$(dirname "$GRADLEW_PATH")" >> $GITHUB_ENV
 
-    - name: Build with Gradle
-      run: ./gradlew assembleDebug
+    - name: Build Debug APK
+      run: |
+        cd ${{ env.GRADLEW_DIR }}
+        ./gradlew assembleDebug
 
-    - name: Upload APK Artifact
+    - name: Find and Upload APK Automatically
       uses: actions/upload-artifact@v4
       with:
         name: Oreks-GPS-App
-        path: app/build/outputs/apk/debug/app-debug.apk
+        path: "**/build/outputs/apk/debug/*.apk"

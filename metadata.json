@@ -1,0 +1,6 @@
+{
+  "name": "GPS Camera Tracker",
+  "description": "Geotagged GPS camera tracker that stamps real-time coordinates, address, compass heading, and timestamp onto captured photos.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

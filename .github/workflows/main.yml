@@ -1,4 +1,4 @@
-name: Compatible Cloud APK Builder
+name: Ultimate Smart APK Builder
 
 on:
   push:
@@ -12,28 +12,33 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    # Humne Java version 17 se badal kar 8 kar diya hai purane gradle ke liye
     - name: set up JDK 8
       uses: actions/setup-java@v4
       with:
         java-version: '8'
         distribution: 'temurin'
 
-    - name: Setup Gradle Environment
+    - name: Find and Move to Android Root Directory
       run: |
-        sudo apt-get update
-        sudo apt-get install -y gradle
+        # Yeh command dhoondegi ki build.gradle file kis folder me chhupi hai
+        GRADLE_ROOT=$(find . -name "build.gradle" -o -name "build.gradle.kts" | grep -v ".github" | head -n 1)
+        GRADLE_DIR=$(dirname "$GRADLE_ROOT")
+        echo "Android project root found at: $GRADLE_DIR"
+        echo "PROJECT_ROOT=$GRADLE_DIR" >> $GITHUB_ENV
 
-    - name: Generate Fresh Gradle Wrapper
+    - name: Build Debug APK from Project Root
       run: |
-        gradle wrapper
+        cd ${{ env.PROJECT_ROOT }}
+        # Agar gradlew file nahi hai, toh automatic fresh wrapper banayega
+        if [ ! -f gradlew ]; then
+          sudo apt-get update && sudo apt-get install -y gradle
+          gradle wrapper
+        fi
         chmod +x gradlew
+        ./gradlew assembleDebug
 
-    - name: Build Debug APK
-      run: ./gradlew assembleDebug
-
-    - name: Find and Upload APK Automatically
+    - name: Upload APK Automatically
       uses: actions/upload-artifact@v4
       with:
-        name: Oreks-GPS-App
+        name: Oreks-GPS-Tracker-APK
         path: "**/build/outputs/apk/debug/*.apk"

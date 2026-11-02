@@ -1,4 +1,4 @@
-name: Live Cloud APK Builder
+name: Ultimate Cloud APK Builder
 
 on:
   push:
@@ -19,21 +19,20 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    - name: Find and Fix Permissions for gradlew
+    - name: Setup Gradle Environment
       run: |
-        GRADLEW_PATH=$(find . -name "gradlew" | head -n 1)
-        if [ -z "$GRADLEW_PATH" ]; then
-          echo "Bhai gradlew file pure project me kahi nahi mili!"
-          exit 1
-        fi
-        echo "Gradlew found at: $GRADLEW_PATH"
-        chmod +x "$GRADLEW_PATH"
-        echo "GRADLEW_DIR=$(dirname "$GRADLEW_PATH")" >> $GITHUB_ENV
+        sudo apt-get update
+        sudo apt-get install -y gradle
+        echo "Bhai naya gradle install ho gaya hai cloud par!"
+
+    - name: Generate Fresh Gradle Wrapper
+      run: |
+        gradle wrapper
+        chmod +x gradlew
+        echo "Bhai gradlew file automatic generate kar di hai!"
 
     - name: Build Debug APK
-      run: |
-        cd ${{ env.GRADLEW_DIR }}
-        ./gradlew assembleDebug
+      run: ./gradlew assembleDebug
 
     - name: Find and Upload APK Automatically
       uses: actions/upload-artifact@v4
